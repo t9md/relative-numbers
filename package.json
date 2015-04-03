@@ -2,7 +2,7 @@
   "name": "relative-line-numbers",
   "main": "./lib/relative-line-numbers",
   "version": "0.1.1",
-  "description": "A short description of your package",
+  "description": "Relative line numbers for Atom",
   "activationCommands": {
     "atom-workspace": "relative-line-numbers:toggle"
   },
