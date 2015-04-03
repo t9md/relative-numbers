@@ -6,7 +6,7 @@
   "activationCommands": {
     "atom-workspace": "relative-line-numbers:toggle"
   },
-  "repository": "https://github.com/rovansteen/relative-line-numbers",
+  "repository": "https://github.com/rovansteen/atom-relative-line-numbers",
   "license": "MIT",
   "engines": {
     "atom": ">=0.174.0 <2.0.0"
