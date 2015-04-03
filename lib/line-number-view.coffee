@@ -2,20 +2,19 @@
 
 module.exports =
 class LineNumberView
-
   constructor: (@editor) ->
     @subscriptions = new CompositeDisposable()
     @editorView = atom.views.getView(@editor)
     @trueNumberCurrentLine = atom.config.get('relative-line-numbers.trueNumberCurrentLine')
 
     # Subscribe for when the line numbers should be updated.
-    @subscriptions.add(@editor.onDidChangeCursorPosition(@_calculate))
-    @subscriptions.add(@editor.onDidStopChanging(@_calculate))
+    @subscriptions.add(@editor.onDidChangeCursorPosition(@_update))
+    @subscriptions.add(@editor.onDidStopChanging(@_update))
 
     # Subscribe to twhen the true number on current line config is modified.
     @subscriptions.add atom.config.onDidChange 'relative-line-numbers.trueNumberCurrentLine', =>
       @trueNumberCurrentLine = atom.config.get('relative-line-numbers.trueNumberCurrentLine')
-      @_calculate()
+      @_update()
 
    # Dispose the subscriptions when the editor is destroyed.
     @subscriptions.add @editor.onDidDestroy =>
