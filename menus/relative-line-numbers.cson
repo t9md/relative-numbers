@@ -1,22 +1,22 @@
 # See https://atom.io/docs/latest/hacking-atom-package-word-count#menus for more details
-'context-menu':
-  'atom-text-editor': [
-    {
-      'label': 'Toggle relative-line-numbers'
-      'command': 'relative-line-numbers:toggle'
-    },
-  ]
-'menu': [
-  {
-    'label': 'Packages'
-    'submenu': [
-      'label': 'relative-line-numbers'
-      'submenu': [
-        {
-          'label': 'Toggle'
-          'command': 'relative-line-numbers:toggle'
-        }
-      ]
-    ]
-  }
-]
+# 'context-menu':
+#   'atom-text-editor': [
+#     {
+#       'label': 'Toggle relative-line-numbers'
+#       'command': 'relative-line-numbers:toggle'
+#     },
+#   ]
+# 'menu': [
+#   {
+#     'label': 'Packages'
+#     'submenu': [
+#       'label': 'relative-line-numbers'
+#       'submenu': [
+#         {
+#           'label': 'Toggle'
+#           'command': 'relative-line-numbers:toggle'
+#         }
+#       ]
+#     ]
+#   }
+# ]
