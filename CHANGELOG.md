@@ -1,3 +1,9 @@
+## 0.1.5
+* Added a setting for showing original line numbers alongside the relative (Thanks to @dimatter)
+
+## 0.1.4
+* Bug fix
+
 ## 0.1.3
 * Clean up
 
