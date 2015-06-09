@@ -1,11 +1,11 @@
 {
   "name": "relative-line-numbers",
   "main": "./lib/relative-line-numbers",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Relative line numbers for Atom",
   "repository": "https://github.com/rovansteen/atom-relative-line-numbers",
   "license": "MIT",
-  "activationEvents": [],
+  "activationCommands": [],
   "engines": {
     "atom": ">=0.174.0 <2.0.0"
   },
