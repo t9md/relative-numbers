@@ -7,6 +7,10 @@ class LineNumberView
     @editorView = atom.views.getView(@editor)
     @trueNumberCurrentLine = atom.config.get('relative-numbers.trueNumberCurrentLine')
 
+    @gutter = @editor.addGutter
+      name: 'relative-numbers'
+    @gutter.view = this
+
     # Subscribe for when the line numbers should be updated.
     @subscriptions.add(@editor.onDidChangeCursorPosition(@_update))
     @subscriptions.add(@editor.onDidStopChanging(@_update))
@@ -22,6 +26,11 @@ class LineNumberView
 
     @_update()
 
+  destroy: () ->
+    @subscriptions.dispose()
+    @_undo()
+    @gutter.destroy()
+
   _spacer: (totalLines, currentIndex) ->
     Array(totalLines.toString().length - currentIndex.toString().length + 1).join '&nbsp;'
 
@@ -33,13 +42,26 @@ class LineNumberView
 
     for lineNumberElement in lineNumberElements
       row = Number(lineNumberElement.getAttribute('data-buffer-row'))
-      relativeNumber = (Math.abs(currentLineNumber - (row + 1)))
-      relativeText = relativeNumber.toString()
-      if @trueNumberCurrentLine and relativeNumber == 0
-        relativeNumber = currentLineNumber
-        relativeText = '<span class="relative-current-line">' + currentLineNumber + '</span>'
-      relativeText = @_spacer(totalLines, relativeNumber) + relativeText
+      absolute = row + 1
+      relative = (Math.abs(currentLineNumber - absolute))
+      relativeClass = 'relative'
+      if @trueNumberCurrentLine and relative == 0
+        relative = currentLineNumber
+        relativeClass += ' current-line'
+      absoluteText = @_spacer(totalLines, absolute) + absolute
+      relativeText = @_spacer(totalLines, relative) + relative
 
       # Keep soft-wrapped lines indicator
       if lineNumberElement.innerHTML.indexOf('•') == -1
-        lineNumberElement.innerHTML = "#{relativeText}<div class=\"icon-right\"></div>"
+        lineNumberElement.innerHTML = "<span class=\"absolute\">#{absoluteText}</span><span class=\"#{relativeClass}\">#{relativeText}</span><div class=\"icon-right\"></div>"
+
+  # Undo changes to DOM
+  _undo: () =>
+    totalLines = @editor.getLineCount()
+    lineNumberElements = @editorView.rootElement?.querySelectorAll('.line-number')
+    for lineNumberElement in lineNumberElements
+      row = Number(lineNumberElement.getAttribute('data-buffer-row'))
+      absolute = row + 1
+      absoluteText = @_spacer(totalLines, absolute) + absolute
+      if lineNumberElement.innerHTML.indexOf('•') == -1
+        lineNumberElement.innerHTML = "#{absoluteText}<div class=\"icon-right\"></div>"

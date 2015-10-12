@@ -1,4 +1,5 @@
 LineNumberView = require './line-number-view'
+{CompositeDisposable} = require 'atom'
 
 module.exports =
   # Config schema
@@ -11,9 +12,14 @@ module.exports =
   configDefaults:
     trueNumberCurrentLine: true
 
+  subscriptions: null
+
   activate: (state) ->
-    console.log('Activating relative line numbers.');
-    atom.workspace.observeTextEditors (editor) ->
+    @subscriptions = new CompositeDisposable
+    @subscriptions.add atom.workspace.observeTextEditors (editor) ->
       new LineNumberView(editor)
 
   deactivate: () ->
+    @subscriptions.dispose()
+    for editor in atom.workspace.getTextEditors()
+      editor.gutterWithName('relative-numbers').view?.destroy()
