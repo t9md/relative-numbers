@@ -6,7 +6,6 @@ class LineNumberView
     @subscriptions = new CompositeDisposable()
     @editorView = atom.views.getView(@editor)
     @trueNumberCurrentLine = atom.config.get('relative-numbers.trueNumberCurrentLine')
-    @showNormalLineNumbers = atom.config.get('relative-numbers.showNormalLineNumbers')
 
     # Subscribe for when the line numbers should be updated.
     @subscriptions.add(@editor.onDidChangeCursorPosition(@_update))
@@ -17,45 +16,30 @@ class LineNumberView
       @trueNumberCurrentLine = atom.config.get('relative-numbers.trueNumberCurrentLine')
       @_update()
 
-    # Subscribe to when the show normal line numbers config is modified.
-    @subscriptions.add atom.config.onDidChange 'relative-numbers.showNormalLineNumbers', =>
-      @showNormalLineNumbers = atom.config.get('relative-numbers.showNormalLineNumbers')
-      @_update()
-
-   # Dispose the subscriptions when the editor is destroyed.
+    # Dispose the subscriptions when the editor is destroyed.
     @subscriptions.add @editor.onDidDestroy =>
       @subscriptions.dispose()
 
     @_update()
 
   _spacer: (totalLines, currentIndex) ->
-    Array(totalLines.toString().length - currentIndex.toString().length + 1).join ' '
+    Array(totalLines.toString().length - currentIndex.toString().length + 1).join '&nbsp;'
 
   # Update the line numbers on the editor
   _update: () =>
     totalLines = @editor.getLineCount()
-    currentLineNumber = @editor.getCursorScreenPosition().row + 1
+    currentLineNumber = Number(@editor.getCursorBufferPosition().row) + 1
     lineNumberElements = @editorView.rootElement?.querySelectorAll('.line-number')
 
-    index = @_index(totalLines, currentLineNumber)
-
     for lineNumberElement in lineNumberElements
-      row = lineNumberElement.getAttribute('data-buffer-row')
-      relative = index[row] or = 0
-      normalLineNumbers = ''
-      if @showNormalLineNumbers
-        humanRow = parseInt(row) + 1
-        normalLineNumbers = humanRow + @_spacer(totalLines, humanRow) + " "
-      lineNumberElement.innerHTML = "#{normalLineNumbers}#{relative}<div class=\"icon-right\"></div>"
+      row = Number(lineNumberElement.getAttribute('data-buffer-row'))
+      relativeNumber = (Math.abs(currentLineNumber - (row + 1)))
+      relativeText = relativeNumber.toString()
+      if @trueNumberCurrentLine and relativeNumber == 0
+        relativeNumber = currentLineNumber
+        relativeText = '<span class="relative-current-line">' + currentLineNumber + '</span>'
+      relativeText = @_spacer(totalLines, relativeNumber) + relativeText
 
-  # Return a lookup  array with the relative line numbers
-  _index: (totalLines, currentLineNumber) ->
-    for line in [0...totalLines]
-      lineNumber = (Math.abs(currentLineNumber - (line + 1)))
-      if @trueNumberCurrentLine and lineNumber == 0
-        if @showNormalLineNumbers
-          '•'
-        else
-          currentLineNumber
-      else
-        lineNumber
+      # Keep soft-wrapped lines indicator
+      if lineNumberElement.innerHTML.indexOf('•') == -1
+        lineNumberElement.innerHTML = "#{relativeText}<div class=\"icon-right\"></div>"
