@@ -5,21 +5,21 @@ class LineNumberView
   constructor: (@editor) ->
     @subscriptions = new CompositeDisposable()
     @editorView = atom.views.getView(@editor)
-    @trueNumberCurrentLine = atom.config.get('relative-line-numbers.trueNumberCurrentLine')
-    @showNormalLineNumbers = atom.config.get('relative-line-numbers.showNormalLineNumbers')
+    @trueNumberCurrentLine = atom.config.get('relative-numbers.trueNumberCurrentLine')
+    @showNormalLineNumbers = atom.config.get('relative-numbers.showNormalLineNumbers')
 
     # Subscribe for when the line numbers should be updated.
     @subscriptions.add(@editor.onDidChangeCursorPosition(@_update))
     @subscriptions.add(@editor.onDidStopChanging(@_update))
 
     # Subscribe to when the true number on current line config is modified.
-    @subscriptions.add atom.config.onDidChange 'relative-line-numbers.trueNumberCurrentLine', =>
-      @trueNumberCurrentLine = atom.config.get('relative-line-numbers.trueNumberCurrentLine')
+    @subscriptions.add atom.config.onDidChange 'relative-numbers.trueNumberCurrentLine', =>
+      @trueNumberCurrentLine = atom.config.get('relative-numbers.trueNumberCurrentLine')
       @_update()
 
     # Subscribe to when the show normal line numbers config is modified.
-    @subscriptions.add atom.config.onDidChange 'relative-line-numbers.showNormalLineNumbers', =>
-      @showNormalLineNumbers = atom.config.get('relative-line-numbers.showNormalLineNumbers')
+    @subscriptions.add atom.config.onDidChange 'relative-numbers.showNormalLineNumbers', =>
+      @showNormalLineNumbers = atom.config.get('relative-numbers.showNormalLineNumbers')
       @_update()
 
    # Dispose the subscriptions when the editor is destroyed.

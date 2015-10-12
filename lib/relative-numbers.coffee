@@ -17,8 +17,8 @@ module.exports =
     showNormalLineNumbers: true
 
   activate: (state) ->
-    console.log('Activiating relative line numbers.');
+    console.log('Activating relative line numbers.');
     atom.workspace.observeTextEditors (editor) ->
       new LineNumberView(editor)
 
-  deactive: () ->
+  deactivate: () ->
