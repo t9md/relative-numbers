@@ -7,6 +7,11 @@ atom-text-editor::shadow {
   .absolute {
     display: none
   }
+
+  // The gutter is only a dummy and not actually visible
+  .gutter[gutter-name='relative-numbers'] {
+    display: none
+  }
 }
 
 // In insert mode, line numbers should be normal

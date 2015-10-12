@@ -11,9 +11,14 @@ class LineNumberView
       name: 'relative-numbers'
     @gutter.view = this
 
+    # Update line numbers whenever tiles are updated
+    @lineNumbersContainer = @editorView.rootElement?.querySelector '.line-numbers'
+    @observer = new MutationObserver(@_update)
+    @observer.observe(@lineNumbersContainer, childList: true)
+
     # Subscribe for when the line numbers should be updated.
-    @subscriptions.add(@editor.onDidChangeCursorPosition(@_update))
-    @subscriptions.add(@editor.onDidStopChanging(@_update))
+    @subscriptions.add @editor.onDidChangeCursorPosition(@_update)
+    @subscriptions.add @editor.onDidStopChanging(@_update)
 
     # Subscribe to when the true number on current line config is modified.
     @subscriptions.add atom.config.onDidChange 'relative-numbers.trueNumberCurrentLine', =>
@@ -23,6 +28,7 @@ class LineNumberView
     # Dispose the subscriptions when the editor is destroyed.
     @subscriptions.add @editor.onDidDestroy =>
       @subscriptions.dispose()
+      @observer.disconnect()
 
     @_update()
 
@@ -30,6 +36,7 @@ class LineNumberView
     @subscriptions.dispose()
     @_undo()
     @gutter.destroy()
+    @observer.disconnect()
 
   _spacer: (totalLines, currentIndex) ->
     Array(totalLines.toString().length - currentIndex.toString().length + 1).join '&nbsp;'
