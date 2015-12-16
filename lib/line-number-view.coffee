@@ -44,7 +44,22 @@ class LineNumberView
   # Update the line numbers on the editor
   _update: () =>
     totalLines = @editor.getLineCount()
-    currentLineNumber = Number(@editor.getCursorBufferPosition().row) + 1
+    bufferRow = @editor.getCursorBufferPosition().row
+
+    # Check if selection ends with newline (line-selection)
+    if @editor.getSelectedText().match /\n$/
+      selectRange = @editor.getSelectedBufferRange()
+      currentLineNumber = bufferRow
+
+      # Check if multiple line selection
+      if selectRange.start.row != selectRange.end.row
+
+        # Check if cursor on first or last line (needed for vim-mode line selection)
+        if selectRange.start.row == @editor.getCursorBufferPosition().row
+          currentLineNumber = bufferRow + 1
+    else
+      currentLineNumber = bufferRow + 1
+      
     lineNumberElements = @editorView.rootElement?.querySelectorAll('.line-number')
 
     for lineNumberElement in lineNumberElements
