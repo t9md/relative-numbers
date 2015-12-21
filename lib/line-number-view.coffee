@@ -27,7 +27,7 @@ class LineNumberView
       @_update()
 
     # Subscribe to when the start at one config option is modified
-    @subscriptions.add atom.config.onDidChange 'relative-numbers.trueNumberCurrentLine', =>
+    @subscriptions.add atom.config.onDidChange 'relative-numbers.startAtOne', =>
       @startAtOne = atom.config.get('relative-numbers.startAtOne')
       @_update()
 
@@ -61,25 +61,24 @@ class LineNumberView
       if selectRange.start.row != selectRange.end.row
 
         # Check if cursor on first or last line (needed for vim-mode line selection)
-        if selectRange.start.row == @editor.getCursorBufferPosition().row
+        if selectRange.start.row == bufferRow
           currentLineNumber = bufferRow + 1
     else
       currentLineNumber = bufferRow + 1
-      
-    lineNumberElements = @editorView.rootElement?.querySelectorAll('.line-number')
-    offset = 0
 
-    if @startAtOne
-      offset = 1
+    lineNumberElements = @editorView.rootElement?.querySelectorAll('.line-number')
+    offset = if @startAtOne then 1 else 0
 
     for lineNumberElement in lineNumberElements
       row = Number(lineNumberElement.getAttribute('data-buffer-row'))
       absolute = row + 1
-      relative = (Math.abs(currentLineNumber - absolute) + offset)
+      relative = Math.abs(currentLineNumber - absolute)
       relativeClass = 'relative'
       if @trueNumberCurrentLine and relative == 0
         relative = currentLineNumber
         relativeClass += ' current-line'
+      # Apply offset last thing before rendering
+      relative += offset
       absoluteText = @_spacer(totalLines, absolute) + absolute
       relativeText = @_spacer(totalLines, relative) + relative
 
