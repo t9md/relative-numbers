@@ -8,9 +8,14 @@ module.exports =
       type: 'boolean'
       default: true
       description: 'Show the true number on the current line'
+    startAtOne:
+      type: 'boolean'
+      default: false
+      description: 'Start relative line numbering at one'
 
   configDefaults:
     trueNumberCurrentLine: true
+    startAtOne: false
 
   subscriptions: null
 

@@ -6,6 +6,7 @@ class LineNumberView
     @subscriptions = new CompositeDisposable()
     @editorView = atom.views.getView(@editor)
     @trueNumberCurrentLine = atom.config.get('relative-numbers.trueNumberCurrentLine')
+    @startAtOne = atom.config.get('relative-numbers.startAtOne')
 
     @gutter = @editor.addGutter
       name: 'relative-numbers'
@@ -23,6 +24,11 @@ class LineNumberView
     # Subscribe to when the true number on current line config is modified.
     @subscriptions.add atom.config.onDidChange 'relative-numbers.trueNumberCurrentLine', =>
       @trueNumberCurrentLine = atom.config.get('relative-numbers.trueNumberCurrentLine')
+      @_update()
+
+    # Subscribe to when the start at one config option is modified
+    @subscriptions.add atom.config.onDidChange 'relative-numbers.trueNumberCurrentLine', =>
+      @startAtOne = atom.config.get('relative-numbers.startAtOne')
       @_update()
 
     # Dispose the subscriptions when the editor is destroyed.
@@ -61,11 +67,15 @@ class LineNumberView
       currentLineNumber = bufferRow + 1
       
     lineNumberElements = @editorView.rootElement?.querySelectorAll('.line-number')
+    offset = 0
+
+    if @startAtOne
+      offset = 1
 
     for lineNumberElement in lineNumberElements
       row = Number(lineNumberElement.getAttribute('data-buffer-row'))
       absolute = row + 1
-      relative = (Math.abs(currentLineNumber - absolute))
+      relative = (Math.abs(currentLineNumber - absolute) + offset)
       relativeClass = 'relative'
       if @trueNumberCurrentLine and relative == 0
         relative = currentLineNumber
