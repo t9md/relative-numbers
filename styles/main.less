@@ -30,3 +30,18 @@ atom-text-editor.vim-mode-plus.insert-mode::shadow {
     display: none
   }
 }
+
+// Show absolute
+atom-text-editor::shadow .show-absolute {
+  text-align: left;
+  color: fade(@text-color-selected, 50%);
+
+  .absolute {
+    display: inline;
+    margin-right: 1em;
+  }
+  .relative {
+    display: inline !important;
+    color: fade(@text-color-selected, 100%);
+  }
+}

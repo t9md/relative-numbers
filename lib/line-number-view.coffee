@@ -6,7 +6,10 @@ class LineNumberView
     @subscriptions = new CompositeDisposable()
     @editorView = atom.views.getView(@editor)
     @trueNumberCurrentLine = atom.config.get('relative-numbers.trueNumberCurrentLine')
+    @showAbsoluteNumbers = atom.config.get('relative-numbers.showAbsoluteNumbers')
     @startAtOne = atom.config.get('relative-numbers.startAtOne')
+
+    @lineNumberGutterView = atom.views.getView(@editor.gutterWithName('line-number'))
 
     @gutter = @editor.addGutter
       name: 'relative-numbers'
@@ -25,6 +28,11 @@ class LineNumberView
     @subscriptions.add atom.config.onDidChange 'relative-numbers.trueNumberCurrentLine', =>
       @trueNumberCurrentLine = atom.config.get('relative-numbers.trueNumberCurrentLine')
       @_update()
+
+    # Subscribe to when the show absolute numbers setting has changed
+    @subscriptions.add atom.config.onDidChange 'relative-numbers.showAbsoluteNumbers', =>
+      @showAbsoluteNumbers = atom.config.get('relative-numbers.showAbsoluteNumbers')
+      @_updateAbsoluteNumbers()
 
     # Subscribe to when the start at one config option is modified
     @subscriptions.add atom.config.onDidChange 'relative-numbers.startAtOne', =>
@@ -47,6 +55,21 @@ class LineNumberView
   _spacer: (totalLines, currentIndex) ->
     width = Math.max(0, totalLines.toString().length - currentIndex.toString().length)
     Array(width + 1).join '&nbsp;'
+
+  # Toggle the show-absolute class from the line number gutter view
+  _toggleAbsoluteClass: (isActive=false) ->
+    classNames = @lineNumberGutterView.className.split(' ')
+
+    # Add the show-absolute class if the setting is active and the class
+    # was not previously added
+    if isActive
+      classNames.push('show-absolute')
+      @lineNumberGutterView.className = classNames.join(' ')
+    # Remove the show-absolute class if the settings is not active and is in
+    # the list of active classNames on the view.
+    else
+      classNames = classNames.filter((name) -> name != 'show-absolute')
+      @lineNumberGutterView.className = classNames.join(' ')
 
   # Update the line numbers on the editor
   _update: () =>
@@ -87,6 +110,13 @@ class LineNumberView
       if lineNumberElement.innerHTML.indexOf('•') == -1
         lineNumberElement.innerHTML = "<span class=\"absolute\">#{absoluteText}</span><span class=\"#{relativeClass}\">#{relativeText}</span><div class=\"icon-right\"></div>"
 
+  _updateAbsoluteNumbers: () =>
+    className = @lineNumberGutterView.className
+    if not className.includes('show-absolute') and @showAbsoluteNumbers
+      @_toggleAbsoluteClass(true)
+    else if className.includes('show-absolute') and not @showAbsoluteNumbers
+      @_toggleAbsoluteClass(false)
+
   # Undo changes to DOM
   _undo: () =>
     totalLines = @editor.getLineCount()
@@ -97,3 +127,7 @@ class LineNumberView
       absoluteText = @_spacer(totalLines, absolute) + absolute
       if lineNumberElement.innerHTML.indexOf('•') == -1
         lineNumberElement.innerHTML = "#{absoluteText}<div class=\"icon-right\"></div>"
+
+    # Remove show-absolute class name if present
+    if @lineNumberGutterView.className.includes('show-absolute')
+      @_toggleAbsoluteClass(false)

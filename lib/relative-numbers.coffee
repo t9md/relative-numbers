@@ -8,6 +8,10 @@ module.exports =
       type: 'boolean'
       default: true
       description: 'Show the true number on the current line'
+    showAbsoluteNumbers:
+      type: 'boolean'
+      default: false
+      description: 'Show absolute line numbers too?'
     startAtOne:
       type: 'boolean'
       default: false
@@ -15,6 +19,7 @@ module.exports =
 
   configDefaults:
     trueNumberCurrentLine: true
+    showAbsoluteNumbers: false
     startAtOne: false
 
   subscriptions: null
