@@ -45,6 +45,7 @@ class LineNumberView
       @observer.disconnect()
 
     @_update()
+    @_updateAbsoluteNumbers()
 
   destroy: () ->
     @subscriptions.dispose()
