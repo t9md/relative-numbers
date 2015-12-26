@@ -34,14 +34,13 @@ atom-text-editor.vim-mode-plus.insert-mode::shadow {
 // Show absolute
 atom-text-editor::shadow .show-absolute {
   text-align: left;
-  color: fade(@text-color-selected, 50%);
-
+  color: fade(@syntax-gutter-text-color, 50%);
   .absolute {
     display: inline;
     margin-right: 1em;
   }
   .relative {
     display: inline !important;
-    color: fade(@text-color-selected, 100%);
+    color: fade(@syntax-gutter-text-color, 100%);
   }
 }
