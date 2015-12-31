@@ -20,14 +20,3 @@ atom-text-editor::shadow .relative.current-line {
 }
 ```
 
-### Show both absolute and relative numbers
-
-The absolute line numbers are still there, they're just invisible. Put this in your stylesheet to always show them:
-
-``` less
-atom-text-editor::shadow .absolute {
-  display: inline;
-  opacity: 0.5;
-  padding-right: 1em;
-}
-```
