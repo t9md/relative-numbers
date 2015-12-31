@@ -1,10 +1,9 @@
 @import "ui-variables";
+@import "syntax-variables";
 
 atom-text-editor::shadow {
   .relative.current-line {
-    // Because @text-color-selected is already used in the line numbers gutter,
-    // we choose one of the other colors defined by the theme. Yellow is the
-    // default for "modified" and looks good to me in a number of themes.
+    // Add some color to make the current line stand out.
     color: @text-color-info
   }
   .absolute {
@@ -31,16 +30,15 @@ atom-text-editor.vim-mode-plus.insert-mode::shadow {
   }
 }
 
-// Show absolute
+// Show absolute config option
 atom-text-editor::shadow .show-absolute {
-  text-align: left;
-  color: fade(@syntax-gutter-text-color, 50%);
+  // text-align: left;
   .absolute {
     display: inline;
     margin-right: 1em;
+    color: fade(@syntax-gutter-text-color, 50%);
   }
   .relative {
     display: inline !important;
-    color: fade(@syntax-gutter-text-color, 100%);
   }
 }
