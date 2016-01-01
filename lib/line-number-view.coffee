@@ -15,14 +15,19 @@ class LineNumberView
       name: 'relative-numbers'
     @gutter.view = this
 
-    # Update line numbers whenever tiles are updated
-    @lineNumbersContainer = @editorView.rootElement?.querySelector '.line-numbers'
-    @observer = new MutationObserver(@_update)
-    @observer.observe(@lineNumbersContainer, childList: true)
+    try
+      # Preferred: Subscribe to any editor model changes
+      @subscriptions.add @editorView.model.onDidChange(@_update)
+    catch
+      # Fallback: Subscribe to initialization and editor changes
+      @subscriptions.add @editorView.onDidAttach(@_update)
+      @subscriptions.add @editor.onDidStopChanging(@_update)
 
-    # Subscribe for when the line numbers should be updated.
+    # Subscribe for when the cursor position changes
     @subscriptions.add @editor.onDidChangeCursorPosition(@_update)
-    @subscriptions.add @editor.onDidStopChanging(@_update)
+
+    # Update when scrolling
+    @subscriptions.add @editorView.onDidChangeScrollTop(@_update)
 
     # Subscribe to when the true number on current line config is modified.
     @subscriptions.add atom.config.onDidChange 'relative-numbers.trueNumberCurrentLine', =>
@@ -74,6 +79,14 @@ class LineNumberView
 
   # Update the line numbers on the editor
   _update: () =>
+    # If the gutter is updated asynchronously, we need to do the same thing
+    # otherwise our changes will just get reverted back.
+    if @editorView.isUpdatedSynchronously()
+      @_updateSync()
+    else
+      atom.views.updateDocument () => @_updateSync()
+
+  _updateSync: () =>
     totalLines = @editor.getLineCount()
     bufferRow = @editor.getCursorBufferPosition().row
 
