@@ -47,7 +47,6 @@ class LineNumberView
     # Dispose the subscriptions when the editor is destroyed.
     @subscriptions.add @editor.onDidDestroy =>
       @subscriptions.dispose()
-      @observer.disconnect()
 
     @_update()
     @_updateAbsoluteNumbers()
@@ -56,7 +55,6 @@ class LineNumberView
     @subscriptions.dispose()
     @_undo()
     @gutter.destroy()
-    @observer.disconnect()
 
   _spacer: (totalLines, currentIndex) ->
     width = Math.max(0, totalLines.toString().length - currentIndex.toString().length)
