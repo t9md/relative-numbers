@@ -86,36 +86,39 @@ class LineNumberView
 
   _updateSync: () =>
     totalLines = @editor.getLineCount()
-    bufferRow = @editor.getCursorBufferPosition().row
+    currentLineNumber = @editor.getCursorScreenPosition().row
 
-    # Check if selection ends with newline (line-selection)
-    if @editor.getSelectedText().match /\n$/
-      selectRange = @editor.getSelectedBufferRange()
-      currentLineNumber = bufferRow
-
-      # Check if multiple line selection
-      if selectRange.start.row != selectRange.end.row
-
-        # Check if cursor on first or last line (needed for vim-mode line selection)
-        if selectRange.start.row == bufferRow
-          currentLineNumber = bufferRow + 1
+    # Check if selection ends with newline
+    # (The selection ends with new line because of the package vim-mode when
+    # ctrl+v is pressed in visual mode)
+    if @editor.getSelectedText().match(/\n$/)
+      endOfLineSelected = true
     else
-      currentLineNumber = bufferRow + 1
+      currentLineNumber = currentLineNumber + 1
 
     lineNumberElements = @editorView.rootElement?.querySelectorAll('.line-number')
     offset = if @startAtOne then 1 else 0
 
     for lineNumberElement in lineNumberElements
-      row = Number(lineNumberElement.getAttribute('data-buffer-row'))
+      # "|| 0" is used given data-screen-row is undefined for the first row
+      row = Number(lineNumberElement.getAttribute('data-screen-row')) || 0
+
       absolute = row + 1
+
       relative = Math.abs(currentLineNumber - absolute)
       relativeClass = 'relative'
+
       if @trueNumberCurrentLine and relative == 0
-        relative = currentLineNumber
+        if endOfLineSelected
+          relative = Number(@editor.getCursorBufferPosition().row)
+        else
+          relative = Number(@editor.getCursorBufferPosition().row) + 1
+
         relativeClass += ' current-line'
       else
         # Apply offset last thing before rendering
         relative += offset
+
       absoluteText = @_spacer(totalLines, absolute) + absolute
       relativeText = @_spacer(totalLines, relative) + relative
 
