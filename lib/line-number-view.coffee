@@ -85,6 +85,9 @@ class LineNumberView
       atom.views.updateDocument () => @_updateSync()
 
   _updateSync: () =>
+    if @editor.isDestroyed()
+      return
+
     totalLines = @editor.getLineCount()
     currentLineNumber = @editor.getCursorScreenPosition().row
 
