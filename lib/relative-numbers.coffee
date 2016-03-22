@@ -27,7 +27,8 @@ module.exports =
   activate: (state) ->
     @subscriptions = new CompositeDisposable
     @subscriptions.add atom.workspace.observeTextEditors (editor) ->
-      new LineNumberView(editor)
+      if not editor.gutterWithName('relative-numbers')
+        new LineNumberView(editor)
 
   deactivate: () ->
     @subscriptions.dispose()
