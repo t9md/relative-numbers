@@ -98,8 +98,6 @@ class LineNumberView
     totalLines = @editor.getLineCount()
     currentLineNumber = if @softWrapsCount then @editor.getCursorScreenPosition().row else @editor.getCursorBufferPosition().row
 
-    console.log(currentLineNumber)
-
     # Check if selection ends with newline
     # (The selection ends with new line because of the package vim-mode when
     # ctrl+v is pressed in visual mode)
