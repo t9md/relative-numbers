@@ -16,6 +16,10 @@ module.exports =
       type: 'boolean'
       default: false
       description: 'Start relative line numbering at one'
+    softWrapsCount:
+      type: 'boolean'
+      default: true
+      description: 'Do soft-wrapped lines count? (No in vim-mode-plus, yes in vim-mode)'
 
   configDefaults:
     trueNumberCurrentLine: true

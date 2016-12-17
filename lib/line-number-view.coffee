@@ -8,6 +8,7 @@ class LineNumberView
     @trueNumberCurrentLine = atom.config.get('relative-numbers.trueNumberCurrentLine')
     @showAbsoluteNumbers = atom.config.get('relative-numbers.showAbsoluteNumbers')
     @startAtOne = atom.config.get('relative-numbers.startAtOne')
+    @softWrapsCount = atom.config.get('relative-numbers.softWrapsCount')
 
     @lineNumberGutterView = atom.views.getView(@editor.gutterWithName('line-number'))
 
@@ -43,6 +44,12 @@ class LineNumberView
     @subscriptions.add atom.config.onDidChange 'relative-numbers.startAtOne', =>
       @startAtOne = atom.config.get('relative-numbers.startAtOne')
       @_update()
+
+    # Subscribe to when the start at one config option is modified
+    @subscriptions.add atom.config.onDidChange 'relative-numbers.softWrapsCount', =>
+      @softWrapsCount = atom.config.get('relative-numbers.softWrapsCount')
+      @_update()
+
 
     # Dispose the subscriptions when the editor is destroyed.
     @subscriptions.add @editor.onDidDestroy =>
@@ -89,7 +96,9 @@ class LineNumberView
       return
 
     totalLines = @editor.getLineCount()
-    currentLineNumber = @editor.getCursorScreenPosition().row
+    currentLineNumber = if @softWrapsCount then @editor.getCursorScreenPosition().row else @editor.getCursorBufferPosition().row
+
+    console.log(currentLineNumber)
 
     # Check if selection ends with newline
     # (The selection ends with new line because of the package vim-mode when
@@ -101,10 +110,11 @@ class LineNumberView
 
     lineNumberElements = @editorView.rootElement?.querySelectorAll('.line-number')
     offset = if @startAtOne then 1 else 0
+    counting_attribute = if @softWrapsCount then 'data-screen-row' else 'data-buffer-row'
 
     for lineNumberElement in lineNumberElements
       # "|| 0" is used given data-screen-row is undefined for the first row
-      row = Number(lineNumberElement.getAttribute('data-screen-row')) || 0
+      row = Number(lineNumberElement.getAttribute(counting_attribute)) || 0
 
       absolute = row + 1
 
