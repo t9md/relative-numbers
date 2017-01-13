@@ -35,4 +35,4 @@ describe 'Relative Line Numbers', ->
       expect(@editor.gutterWithName('relative-numbers')).not.toBe null
 
     it 'should show line numbers', ->
-      expect(@editorView.shadowRoot.querySelectorAll('.line-number').length).toBe 12
+      expect(@editorView.querySelectorAll('.line-number').length).toBe 7
