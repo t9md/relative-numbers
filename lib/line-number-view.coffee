@@ -58,10 +58,6 @@ class LineNumberView
     width = Math.max(0, String(totalLines).length - String(currentIndex).length)
     '&nbsp;'.repeat(width)
 
-  # Toggle the show-absolute class from the line number gutter view
-  _toggleAbsoluteClass: (isActive=false) ->
-    @lineNumberGutterElement.classList.toggle('show-absolute', isActive)
-
   # Update the line numbers on the editor
   _update: =>
     # If the gutter is updated asynchronously, we need to do the same thing
@@ -120,9 +116,9 @@ class LineNumberView
   _updateAbsoluteNumbers: =>
     className = @lineNumberGutterElement.className
     if not className.includes('show-absolute') and @showAbsoluteNumbers
-      @_toggleAbsoluteClass(true)
+      @lineNumberGutterElement.classList.toggle('show-absolute', true)
     else if className.includes('show-absolute') and not @showAbsoluteNumbers
-      @_toggleAbsoluteClass(false)
+      @lineNumberGutterElement.classList.toggle('show-absolute', false)
 
   # Undo changes to DOM
   _undo: =>
@@ -135,6 +131,4 @@ class LineNumberView
       if lineNumberElement.innerHTML.indexOf('•') is -1
         lineNumberElement.innerHTML = "#{absoluteText}<div class=\"icon-right\"></div>"
 
-    # Remove show-absolute class name if present
-    if @lineNumberGutterElement.className.includes('show-absolute')
-      @_toggleAbsoluteClass(false)
+    @lineNumberGutterElement.classList.remove('show-absolute')
