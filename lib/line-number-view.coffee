@@ -5,10 +5,6 @@ class LineNumberView
   constructor: (@editor) ->
     @subscriptions = new CompositeDisposable()
     @editorElement = @editor.element
-    @trueNumberCurrentLine = atom.config.get('relative-numbers.trueNumberCurrentLine')
-    @showAbsoluteNumbers = atom.config.get('relative-numbers.showAbsoluteNumbers')
-    @startAtOne = atom.config.get('relative-numbers.startAtOne')
-    @softWrapsCount = atom.config.get('relative-numbers.softWrapsCount')
 
     @lineNumberGutterView = atom.views.getView(@editor.gutterWithName('line-number'))
 
@@ -30,21 +26,25 @@ class LineNumberView
     @subscriptions.add @editorElement.onDidChangeScrollTop(@_update)
 
     # Subscribe to when the true number on current line config is modified.
+    @trueNumberCurrentLine = atom.config.get('relative-numbers.trueNumberCurrentLine')
     @subscriptions.add atom.config.onDidChange 'relative-numbers.trueNumberCurrentLine', =>
       @trueNumberCurrentLine = atom.config.get('relative-numbers.trueNumberCurrentLine')
       @_update()
 
     # Subscribe to when the show absolute numbers setting has changed
+    @showAbsoluteNumbers = atom.config.get('relative-numbers.showAbsoluteNumbers')
     @subscriptions.add atom.config.onDidChange 'relative-numbers.showAbsoluteNumbers', =>
       @showAbsoluteNumbers = atom.config.get('relative-numbers.showAbsoluteNumbers')
       @_updateAbsoluteNumbers()
 
     # Subscribe to when the start at one config option is modified
+    @startAtOne = atom.config.get('relative-numbers.startAtOne')
     @subscriptions.add atom.config.onDidChange 'relative-numbers.startAtOne', =>
       @startAtOne = atom.config.get('relative-numbers.startAtOne')
       @_update()
 
     # Subscribe to when the start at one config option is modified
+    @softWrapsCount = atom.config.get('relative-numbers.softWrapsCount')
     @subscriptions.add atom.config.onDidChange 'relative-numbers.softWrapsCount', =>
       @softWrapsCount = atom.config.get('relative-numbers.softWrapsCount')
       @_update()
