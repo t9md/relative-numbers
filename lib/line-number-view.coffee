@@ -43,12 +43,13 @@ class LineNumberView
 
   destroy: ->
     @subscriptions.dispose()
-    @_undo()
+    @restoreOriginal()
     @gutter.destroy()
 
-  _spacer: (totalLines, currentIndex) ->
-    width = Math.max(0, String(totalLines).length - String(currentIndex).length)
-    '&nbsp;'.repeat(width)
+  formatLineNumber: (lineNumber, lineCount) ->
+    maxWidth = String(lineCount).length
+    width = Math.max(0, maxWidth - String(lineNumber).length)
+    '&nbsp;'.repeat(width) + lineNumber
 
   # Update the line numbers on the editor
   _update: =>
@@ -63,57 +64,49 @@ class LineNumberView
     if @editor.isDestroyed()
       return
 
-    totalLines = @editor.getLineCount()
-    currentLineNumber = if @softWrapsCount then @editor.getCursorScreenPosition().row else @editor.getCursorBufferPosition().row
-
-    # Check if selection ends with newline
-    # (The selection ends with new line because of the package vim-mode when
-    # ctrl+v is pressed in visual mode)
-    if @editor.getSelectedText().match(/\n$/)
-      endOfLineSelected = true
+    if @softWrapsCount
+      currentLineNumber = @editor.getCursorScreenPosition().row
     else
-      currentLineNumber = currentLineNumber + 1
+      selection = @editor.getLastSelection()
+      [startRow, endRow] = selection.getBufferRowRange()
+      if selection.isReversed()
+        currentLineNumber = startRow
+      else
+        currentLineNumber = endRow
+
+    currentLineNumber = currentLineNumber + 1
 
     lineNumberElements = @editorElement.rootElement?.querySelectorAll('.line-number')
     offset = if @startAtOne then 1 else 0
-    counting_attribute = if @softWrapsCount then 'data-screen-row' else 'data-buffer-row'
+    attributeName = if @softWrapsCount then 'data-screen-row' else 'data-buffer-row'
 
+    lineCount = @editor.getLineCount()
     for lineNumberElement in lineNumberElements
-      # "|| 0" is used given data-screen-row is undefined for the first row
-      row = Number(lineNumberElement.getAttribute(counting_attribute)) ? 0
-
+      row = Number(lineNumberElement.getAttribute(attributeName)) ? 0
       absolute = row + 1
-
       relative = Math.abs(currentLineNumber - absolute)
+
       relativeClass = 'relative'
-
-      if @trueNumberCurrentLine and relative is 0
-        if endOfLineSelected
-          relative = Number(@editor.getCursorBufferPosition().row)
-        else
-          relative = Number(@editor.getCursorBufferPosition().row) + 1
-
+      isCurrentLine = relative is 0
+      relative += offset
+      if isCurrentLine
         relativeClass += ' current-line'
-      else
-        # Apply offset last thing before rendering
-        relative += offset
+        relative = currentLineNumber if @trueNumberCurrentLine
 
-      absoluteText = @_spacer(totalLines, absolute) + absolute
-      relativeText = @_spacer(totalLines, relative) + relative
+      absoluteText = @formatLineNumber(absolute, lineCount)
+      relativeText = @formatLineNumber(relative, lineCount)
 
-      # Keep soft-wrapped lines indicator
-      if lineNumberElement.innerHTML.indexOf('•') is -1
-        lineNumberElement.innerHTML = "<span class=\"absolute\">#{absoluteText}</span><span class=\"#{relativeClass}\">#{relativeText}</span><div class=\"icon-right\"></div>"
+      if '.' not in lineNumberElement.innerHTML
+        lineNumberElement.innerHTML = """
+          <span class="absolute">#{absoluteText}</span><span class="#{relativeClass}">#{relativeText}</span><div class="icon-right"></div>
+          """
 
   # Undo changes to DOM
-  _undo: =>
-    totalLines = @editor.getLineCount()
+  restoreOriginal: =>
+    lineCount = @editor.getLineCount()
     lineNumberElements = @editorElement.rootElement?.querySelectorAll('.line-number')
-    for lineNumberElement in lineNumberElements
+    for lineNumberElement in lineNumberElements when '.' not in lineNumberElement.innerHTML
       row = Number(lineNumberElement.getAttribute('data-buffer-row'))
-      absolute = row + 1
-      absoluteText = @_spacer(totalLines, absolute) + absolute
-      if lineNumberElement.innerHTML.indexOf('•') is -1
-        lineNumberElement.innerHTML = "#{absoluteText}<div class=\"icon-right\"></div>"
-
+      absoluteText = @formatLineNumber(row + 1, lineCount)
+      lineNumberElement.innerHTML = "#{absoluteText}<div class=\"icon-right\"></div>"
     @lineNumberGutterElement.classList.remove('show-absolute')
