@@ -1,11 +1,17 @@
 {CompositeDisposable} = require 'atom'
 
+observeConfig = (name, fn) ->
+  atom.config.observe("relative-numbers.#{name}", fn)
+
 module.exports =
 class LineNumberView
   constructor: (@editor) ->
     @subscriptions = new CompositeDisposable()
-    @editorElement = @editor.element
+    # Dispose the subscriptions when the editor is destroyed.
+    @subscriptions.add @editor.onDidDestroy =>
+      @subscriptions.dispose()
 
+    @editorElement = @editor.element
 
     @gutter = @editor.addGutter(name: 'relative-numbers')
     @gutter.view = this
@@ -20,33 +26,20 @@ class LineNumberView
 
     # Subscribe for when the cursor position changes
     @subscriptions.add @editor.onDidChangeCursorPosition(@_update)
-
     # Update when scrolling
     @subscriptions.add @editorElement.onDidChangeScrollTop(@_update)
 
-    @subscriptions.add atom.config.observe 'relative-numbers.trueNumberCurrentLine', (value) =>
-      @trueNumberCurrentLine = value
+    @subscriptions.add observeConfig 'trueNumberCurrentLine', (@trueNumberCurrentLine) =>
+      @_update()
+    @subscriptions.add observeConfig 'startAtOne', (@startAtOne) =>
+      @_update()
+    @subscriptions.add observeConfig 'softWrapsCount', (@softWrapsCount) =>
       @_update()
 
     @lineNumberGutterElement = atom.views.getView(@editor.gutterWithName('line-number'))
     @subscriptions.add atom.config.observe 'relative-numbers.showAbsoluteNumbers', (value) =>
       @showAbsoluteNumbers = value
       @lineNumberGutterElement.classList.toggle('show-absolute', @showAbsoluteNumbers)
-
-    @subscriptions.add atom.config.observe 'relative-numbers.startAtOne', (value) =>
-      @startAtOne = value
-      @_update()
-
-    @subscriptions.add atom.config.onDidChange 'relative-numbers.softWrapsCount', (value) =>
-      @softWrapsCount = value
-      @_update()
-
-
-    # Dispose the subscriptions when the editor is destroyed.
-    @subscriptions.add @editor.onDidDestroy =>
-      @subscriptions.dispose()
-
-    @_update()
 
   destroy: ->
     @subscriptions.dispose()
