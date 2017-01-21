@@ -21,20 +21,15 @@ module.exports =
       default: true
       description: 'Do soft-wrapped lines count? (No in vim-mode-plus, yes in vim-mode)'
 
-  configDefaults:
-    trueNumberCurrentLine: true
-    showAbsoluteNumbers: false
-    startAtOne: false
-
   subscriptions: null
 
   activate: (state) ->
     @subscriptions = new CompositeDisposable
     @subscriptions.add atom.workspace.observeTextEditors (editor) ->
-      if not editor.gutterWithName('relative-numbers')
+      unless editor.gutterWithName('relative-numbers')
         new LineNumberView(editor)
 
-  deactivate: () ->
+  deactivate: ->
     @subscriptions.dispose()
     for editor in atom.workspace.getTextEditors()
       editor.gutterWithName('relative-numbers').view?.destroy()
