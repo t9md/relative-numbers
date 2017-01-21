@@ -6,7 +6,7 @@ class LineNumberView
     @subscriptions = new CompositeDisposable()
     @editorElement = @editor.element
 
-    @lineNumberGutterView = atom.views.getView(@editor.gutterWithName('line-number'))
+    @lineNumberGutterElement = atom.views.getView(@editor.gutterWithName('line-number'))
 
     @gutter = @editor.addGutter(name: 'relative-numbers')
     @gutter.view = this
@@ -55,23 +55,12 @@ class LineNumberView
     @gutter.destroy()
 
   _spacer: (totalLines, currentIndex) ->
-    width = Math.max(0, totalLines.toString().length - currentIndex.toString().length)
-    Array(width + 1).join '&nbsp;'
+    width = Math.max(0, String(totalLines).length - String(currentIndex).length)
+    '&nbsp;'.repeat(width)
 
   # Toggle the show-absolute class from the line number gutter view
   _toggleAbsoluteClass: (isActive=false) ->
-    classNames = @lineNumberGutterView.className.split(' ')
-
-    # Add the show-absolute class if the setting is active and the class
-    # was not previously added
-    if isActive
-      classNames.push('show-absolute')
-      @lineNumberGutterView.className = classNames.join(' ')
-    # Remove the show-absolute class if the settings is not active and is in
-    # the list of active classNames on the view.
-    else
-      classNames = classNames.filter((name) -> name isnt 'show-absolute')
-      @lineNumberGutterView.className = classNames.join(' ')
+    @lineNumberGutterElement.classList.toggle('show-absolute', isActive)
 
   # Update the line numbers on the editor
   _update: =>
@@ -129,7 +118,7 @@ class LineNumberView
         lineNumberElement.innerHTML = "<span class=\"absolute\">#{absoluteText}</span><span class=\"#{relativeClass}\">#{relativeText}</span><div class=\"icon-right\"></div>"
 
   _updateAbsoluteNumbers: =>
-    className = @lineNumberGutterView.className
+    className = @lineNumberGutterElement.className
     if not className.includes('show-absolute') and @showAbsoluteNumbers
       @_toggleAbsoluteClass(true)
     else if className.includes('show-absolute') and not @showAbsoluteNumbers
@@ -147,5 +136,5 @@ class LineNumberView
         lineNumberElement.innerHTML = "#{absoluteText}<div class=\"icon-right\"></div>"
 
     # Remove show-absolute class name if present
-    if @lineNumberGutterView.className.includes('show-absolute')
+    if @lineNumberGutterElement.className.includes('show-absolute')
       @_toggleAbsoluteClass(false)
