@@ -18,23 +18,23 @@ class LineNumberView
 
     try
       # Preferred: Subscribe to any editor model changes
-      @subscriptions.add @editor.onDidChange(@_update)
+      @subscriptions.add @editor.onDidChange(@update)
     catch
       # Fallback: Subscribe to initialization and editor changes
-      @subscriptions.add @editorElement.onDidAttach(@_update)
-      @subscriptions.add @editor.onDidStopChanging(@_update)
+      @subscriptions.add @editorElement.onDidAttach(@update)
+      @subscriptions.add @editor.onDidStopChanging(@update)
 
     # Subscribe for when the cursor position changes
-    @subscriptions.add @editor.onDidChangeCursorPosition(@_update)
+    @subscriptions.add @editor.onDidChangeCursorPosition(@update)
     # Update when scrolling
-    @subscriptions.add @editorElement.onDidChangeScrollTop(@_update)
+    @subscriptions.add @editorElement.onDidChangeScrollTop(@update)
 
     @subscriptions.add observeConfig 'trueNumberCurrentLine', (@trueNumberCurrentLine) =>
-      @_update()
+      @update()
     @subscriptions.add observeConfig 'startAtOne', (@startAtOne) =>
-      @_update()
+      @update()
     @subscriptions.add observeConfig 'softWrapsCount', (@softWrapsCount) =>
-      @_update()
+      @update()
 
     @lineNumberGutterElement = atom.views.getView(@editor.gutterWithName('line-number'))
     @subscriptions.add atom.config.observe 'relative-numbers.showAbsoluteNumbers', (value) =>
@@ -52,15 +52,15 @@ class LineNumberView
     '&nbsp;'.repeat(width) + lineNumber
 
   # Update the line numbers on the editor
-  _update: =>
+  update: =>
     # If the gutter is updated asynchronously, we need to do the same thing
     # otherwise our changes will just get reverted back.
     if @editorElement.isUpdatedSynchronously()
-      @_updateSync()
+      @updateSync()
     else
-      atom.views.updateDocument => @_updateSync()
+      atom.views.updateDocument => @updateSync()
 
-  _updateSync: =>
+  updateSync: =>
     if @editor.isDestroyed()
       return
 
