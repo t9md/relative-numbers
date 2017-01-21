@@ -6,7 +6,6 @@ class LineNumberView
     @subscriptions = new CompositeDisposable()
     @editorElement = @editor.element
 
-    @lineNumberGutterElement = atom.views.getView(@editor.gutterWithName('line-number'))
 
     @gutter = @editor.addGutter(name: 'relative-numbers')
     @gutter.view = this
@@ -29,9 +28,10 @@ class LineNumberView
       @trueNumberCurrentLine = value
       @_update()
 
+    @lineNumberGutterElement = atom.views.getView(@editor.gutterWithName('line-number'))
     @subscriptions.add atom.config.observe 'relative-numbers.showAbsoluteNumbers', (value) =>
       @showAbsoluteNumbers = value
-      @_updateAbsoluteNumbers()
+      @lineNumberGutterElement.classList.toggle('show-absolute', @showAbsoluteNumbers)
 
     @subscriptions.add atom.config.observe 'relative-numbers.startAtOne', (value) =>
       @startAtOne = value
@@ -47,7 +47,6 @@ class LineNumberView
       @subscriptions.dispose()
 
     @_update()
-    @_updateAbsoluteNumbers()
 
   destroy: ->
     @subscriptions.dispose()
@@ -112,13 +111,6 @@ class LineNumberView
       # Keep soft-wrapped lines indicator
       if lineNumberElement.innerHTML.indexOf('•') is -1
         lineNumberElement.innerHTML = "<span class=\"absolute\">#{absoluteText}</span><span class=\"#{relativeClass}\">#{relativeText}</span><div class=\"icon-right\"></div>"
-
-  _updateAbsoluteNumbers: =>
-    className = @lineNumberGutterElement.className
-    if not className.includes('show-absolute') and @showAbsoluteNumbers
-      @lineNumberGutterElement.classList.toggle('show-absolute', true)
-    else if className.includes('show-absolute') and not @showAbsoluteNumbers
-      @lineNumberGutterElement.classList.toggle('show-absolute', false)
 
   # Undo changes to DOM
   _undo: =>
