@@ -25,28 +25,20 @@ class LineNumberView
     # Update when scrolling
     @subscriptions.add @editorElement.onDidChangeScrollTop(@_update)
 
-    # Subscribe to when the true number on current line config is modified.
-    @trueNumberCurrentLine = atom.config.get('relative-numbers.trueNumberCurrentLine')
-    @subscriptions.add atom.config.onDidChange 'relative-numbers.trueNumberCurrentLine', =>
-      @trueNumberCurrentLine = atom.config.get('relative-numbers.trueNumberCurrentLine')
+    @subscriptions.add atom.config.observe 'relative-numbers.trueNumberCurrentLine', (value) =>
+      @trueNumberCurrentLine = value
       @_update()
 
-    # Subscribe to when the show absolute numbers setting has changed
-    @showAbsoluteNumbers = atom.config.get('relative-numbers.showAbsoluteNumbers')
-    @subscriptions.add atom.config.onDidChange 'relative-numbers.showAbsoluteNumbers', =>
-      @showAbsoluteNumbers = atom.config.get('relative-numbers.showAbsoluteNumbers')
+    @subscriptions.add atom.config.observe 'relative-numbers.showAbsoluteNumbers', (value) =>
+      @showAbsoluteNumbers = value
       @_updateAbsoluteNumbers()
 
-    # Subscribe to when the start at one config option is modified
-    @startAtOne = atom.config.get('relative-numbers.startAtOne')
-    @subscriptions.add atom.config.onDidChange 'relative-numbers.startAtOne', =>
-      @startAtOne = atom.config.get('relative-numbers.startAtOne')
+    @subscriptions.add atom.config.observe 'relative-numbers.startAtOne', (value) =>
+      @startAtOne = value
       @_update()
 
-    # Subscribe to when the start at one config option is modified
-    @softWrapsCount = atom.config.get('relative-numbers.softWrapsCount')
-    @subscriptions.add atom.config.onDidChange 'relative-numbers.softWrapsCount', =>
-      @softWrapsCount = atom.config.get('relative-numbers.softWrapsCount')
+    @subscriptions.add atom.config.onDidChange 'relative-numbers.softWrapsCount', (value) =>
+      @softWrapsCount = value
       @_update()
 
 
