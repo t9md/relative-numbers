@@ -1,3 +1,11 @@
+# [t9md note-start] Private forked version which include fix and slight changes
+
+- Making show relative-numbers only in `operator-pending-mode`.  
+- So that I can specify operator target range by count + `j` or count + `k`.  
+- Particular useful when combining `occurrence` feature of vim-mode-plus.
+
+# [t9md note-end]
+
 # relative-numbers package
 
 ![Example Screencast](https://github.com/justmoon/relative-numbers/blob/master/screencast.gif?raw=true)
@@ -19,4 +27,3 @@ atom-text-editor.editor .relative.current-line {
   color: purple
 }
 ```
-

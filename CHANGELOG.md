@@ -1,3 +1,5 @@
+## 0.1.?: [t9md] start using forked version locally
+
 ## 0.1.5
 * Added a setting for showing original line numbers alongside the relative (Thanks to @dimatter)
 
