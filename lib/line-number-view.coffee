@@ -58,7 +58,7 @@ class LineNumberView
     @_update()
     @_updateAbsoluteNumbers()
 
-  destroy: () ->
+  destroy: ->
     @subscriptions.dispose()
     @_undo()
     @gutter.destroy()
@@ -67,44 +67,31 @@ class LineNumberView
     width = Math.max(0, totalLines.toString().length - currentIndex.toString().length)
     Array(width + 1).join '&nbsp;'
 
-  # Toggle the show-absolute class from the line number gutter view
-  _toggleAbsoluteClass: (isActive=false) ->
-    classNames = @lineNumberGutterView.className.split(' ')
-
-    # Add the show-absolute class if the setting is active and the class
-    # was not previously added
-    if isActive
-      classNames.push('show-absolute')
-      @lineNumberGutterView.className = classNames.join(' ')
-    # Remove the show-absolute class if the settings is not active and is in
-    # the list of active classNames on the view.
-    else
-      classNames = classNames.filter((name) -> name != 'show-absolute')
-      @lineNumberGutterView.className = classNames.join(' ')
-
   # Update the line numbers on the editor
-  _update: () =>
+  _update: =>
     # If the gutter is updated asynchronously, we need to do the same thing
     # otherwise our changes will just get reverted back.
     if @editorView.isUpdatedSynchronously()
       @_updateSync()
     else
-      atom.views.updateDocument () => @_updateSync()
+      atom.views.updateDocument => @_updateSync()
 
-  _updateSync: () =>
+  _updateSync: =>
     if @editor.isDestroyed()
       return
 
     totalLines = @editor.getLineCount()
-    currentLineNumber = if @softWrapsCount then @editor.getCursorScreenPosition().row else @editor.getCursorBufferPosition().row
-
-    # Check if selection ends with newline
-    # (The selection ends with new line because of the package vim-mode when
-    # ctrl+v is pressed in visual mode)
-    if @editor.getSelectedText().match(/\n$/)
-      endOfLineSelected = true
+    if @softWrapsCount
+      currentLineNumber = @editor.getCursorScreenPosition().row
     else
-      currentLineNumber = currentLineNumber + 1
+      selection = @editor.getLastSelection()
+      [startRow, endRow] = selection.getBufferRowRange()
+      if selection.isReversed()
+        currentLineNumber = startRow
+      else
+        currentLineNumber = endRow
+
+    currentLineNumber = currentLineNumber + 1
 
     lineNumberElements = @editorView.rootElement?.querySelectorAll('.line-number')
     offset = if @startAtOne then 1 else 0
@@ -112,49 +99,38 @@ class LineNumberView
 
     for lineNumberElement in lineNumberElements
       # "|| 0" is used given data-screen-row is undefined for the first row
-      row = Number(lineNumberElement.getAttribute(counting_attribute)) || 0
+      row = Number(lineNumberElement.getAttribute(counting_attribute)) ? 0
 
       absolute = row + 1
 
       relative = Math.abs(currentLineNumber - absolute)
+
       relativeClass = 'relative'
-
-      if @trueNumberCurrentLine and relative == 0
-        if endOfLineSelected
-          relative = Number(@editor.getCursorBufferPosition().row)
-        else
-          relative = Number(@editor.getCursorBufferPosition().row) + 1
-
+      isCurrentLine = relative is 0
+      relative += offset
+      if isCurrentLine and @trueNumberCurrentLine
         relativeClass += ' current-line'
-      else
-        # Apply offset last thing before rendering
-        relative += offset
+        relative = currentLineNumber
 
       absoluteText = @_spacer(totalLines, absolute) + absolute
       relativeText = @_spacer(totalLines, relative) + relative
 
       # Keep soft-wrapped lines indicator
-      if lineNumberElement.innerHTML.indexOf('•') == -1
+      unless '•' in lineNumberElement.innerHTML
         lineNumberElement.innerHTML = "<span class=\"absolute\">#{absoluteText}</span><span class=\"#{relativeClass}\">#{relativeText}</span><div class=\"icon-right\"></div>"
 
-  _updateAbsoluteNumbers: () =>
-    className = @lineNumberGutterView.className
-    if not className.includes('show-absolute') and @showAbsoluteNumbers
-      @_toggleAbsoluteClass(true)
-    else if className.includes('show-absolute') and not @showAbsoluteNumbers
-      @_toggleAbsoluteClass(false)
+  _updateAbsoluteNumbers: ->
+    @lineNumberGutterView.classList.toggle('show-absolute', @showAbsoluteNumbers)
 
   # Undo changes to DOM
-  _undo: () =>
+  _undo: =>
     totalLines = @editor.getLineCount()
     lineNumberElements = @editorView.rootElement?.querySelectorAll('.line-number')
     for lineNumberElement in lineNumberElements
       row = Number(lineNumberElement.getAttribute('data-buffer-row'))
       absolute = row + 1
       absoluteText = @_spacer(totalLines, absolute) + absolute
-      if lineNumberElement.innerHTML.indexOf('•') == -1
+      unless '•' in lineNumberElement.innerHTML
         lineNumberElement.innerHTML = "#{absoluteText}<div class=\"icon-right\"></div>"
 
-    # Remove show-absolute class name if present
-    if @lineNumberGutterView.className.includes('show-absolute')
-      @_toggleAbsoluteClass(false)
+    @lineNumberGutterView.classList.remove('show-absolute')
