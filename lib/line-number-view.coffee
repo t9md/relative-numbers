@@ -58,7 +58,7 @@ class LineNumberView
     @_update()
     @_updateAbsoluteNumbers()
 
-  destroy: () ->
+  destroy: ->
     @subscriptions.dispose()
     @_undo()
     @gutter.destroy()
@@ -68,15 +68,15 @@ class LineNumberView
     Array(width + 1).join '&nbsp;'
 
   # Update the line numbers on the editor
-  _update: () =>
+  _update: =>
     # If the gutter is updated asynchronously, we need to do the same thing
     # otherwise our changes will just get reverted back.
     if @editorView.isUpdatedSynchronously()
       @_updateSync()
     else
-      atom.views.updateDocument () => @_updateSync()
+      atom.views.updateDocument => @_updateSync()
 
-  _updateSync: () =>
+  _updateSync: =>
     if @editor.isDestroyed()
       return
 
@@ -99,7 +99,7 @@ class LineNumberView
 
     for lineNumberElement in lineNumberElements
       # "|| 0" is used given data-screen-row is undefined for the first row
-      row = Number(lineNumberElement.getAttribute(counting_attribute)) || 0
+      row = Number(lineNumberElement.getAttribute(counting_attribute)) ? 0
 
       absolute = row + 1
 
@@ -116,21 +116,21 @@ class LineNumberView
       relativeText = @_spacer(totalLines, relative) + relative
 
       # Keep soft-wrapped lines indicator
-      if lineNumberElement.innerHTML.indexOf('•') == -1
+      unless '•' in lineNumberElement.innerHTML
         lineNumberElement.innerHTML = "<span class=\"absolute\">#{absoluteText}</span><span class=\"#{relativeClass}\">#{relativeText}</span><div class=\"icon-right\"></div>"
 
   _updateAbsoluteNumbers: ->
     @lineNumberGutterView.classList.toggle('show-absolute', @showAbsoluteNumbers)
 
   # Undo changes to DOM
-  _undo: () =>
+  _undo: =>
     totalLines = @editor.getLineCount()
     lineNumberElements = @editorView.rootElement?.querySelectorAll('.line-number')
     for lineNumberElement in lineNumberElements
       row = Number(lineNumberElement.getAttribute('data-buffer-row'))
       absolute = row + 1
       absoluteText = @_spacer(totalLines, absolute) + absolute
-      if lineNumberElement.innerHTML.indexOf('•') == -1
+      unless '•' in lineNumberElement.innerHTML
         lineNumberElement.innerHTML = "#{absoluteText}<div class=\"icon-right\"></div>"
 
     @lineNumberGutterView.classList.remove('show-absolute')

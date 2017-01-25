@@ -34,7 +34,7 @@ module.exports =
       if not editor.gutterWithName('relative-numbers')
         new LineNumberView(editor)
 
-  deactivate: () ->
+  deactivate: ->
     @subscriptions.dispose()
     for editor in atom.workspace.getTextEditors()
       editor.gutterWithName('relative-numbers').view?.destroy()
